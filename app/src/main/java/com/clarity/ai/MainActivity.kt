@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.clarity.ai.ui.screens.MainScreen
+import com.clarity.ai.ui.theme.ClarityTheme
 import com.clarity.ai.viewmodel.FileAnalysisViewModel
 
 class MainActivity : ComponentActivity() {
