@@ -1,6 +1,10 @@
 package com.clarity.ai.viewmodel
 
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +32,38 @@ class FileAnalysisViewModel(application: Application) : AndroidViewModel(applica
 
     private val _scanProgress = MutableStateFlow(0f)
     val scanProgress: StateFlow<Float> = _scanProgress.asStateFlow()
+
+    private val _hasFilePermissions = MutableStateFlow(false)
+    val hasFilePermissions: StateFlow<Boolean> = _hasFilePermissions.asStateFlow()
+
+    init {
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_AUDIO
+            )
+        } else {
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        val hasPermissions = permissions.all { permission ->
+            ContextCompat.checkSelfPermission(
+                getApplication(),
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+
+        _hasFilePermissions.value = hasPermissions
+    }
+
+    fun onPermissionsGranted() {
+        _hasFilePermissions.value = true
+    }
 
     fun startFileScan() {
         viewModelScope.launch {

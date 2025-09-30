@@ -4,32 +4,34 @@ import retrofit2.Response
 import retrofit2.http.*
 import okhttp3.MultipartBody
 
-// Response models matching your backend
+// Document Analysis Response - matches your backend exactly
 data class DocumentAnalysisResponse(
     val filename: String,
     val file_type: String,
     val file_size_bytes: Int,
     val page_count: Int?,
     val content_hash: String?,
-    val extracted_text: String?,
     val summary: String?,
     val date_analyzed: String,
-    val recommendations: List<String>,
     val mobile_summary: String?,
+    val file_size_formatted: String?,
+    val recommendations: List<String>?,
     val relevance_score: Float?
 )
 
+// Image Analysis Response - matches your backend exactly
 data class ImageAnalysisResponse(
     val filename: String,
     val image_hash: String,
     val file_size_bytes: Int,
     val date_analyzed: String,
-    val recommendations: List<String>,
     val mobile_summary: String?,
-    val relevance_score: Float?,
-    val objects_detected: List<String>
+    val file_size_formatted: String?,
+    val recommendations: List<String>?,
+    val relevance_score: Float?
 )
 
+// Dashboard Response - matches your backend exactly
 data class DashboardResponse(
     val summary_stats: SummaryStats,
     val storage_breakdown: List<StorageBreakdown>,
@@ -49,6 +51,11 @@ data class StorageBreakdown(
     val total_size_mb: Float
 )
 
+// Cleanup Suggestions Response - matches your backend exactly
+data class CleanupSuggestionsResponse(
+    val suggestions: List<CleanupSuggestion>
+)
+
 data class CleanupSuggestion(
     val type: String,
     val description: String,
@@ -56,10 +63,7 @@ data class CleanupSuggestion(
     val storage_saved: String
 )
 
-data class CleanupSuggestionsResponse(
-    val suggestions: List<CleanupSuggestion>
-)
-
+// Mobile Insights Response - matches your backend exactly
 data class MobileInsightsResponse(
     val storage_overview: StorageOverview,
     val top_recommendations: List<String>,
@@ -82,26 +86,65 @@ data class FileBreakdown(
 )
 
 data class RecentAnalysis(
-    val documents: List<Map<String, Any>>,
-    val images: List<Map<String, Any>>
+    val documents: List<RecentDocument>,
+    val images: List<RecentImage>
 )
 
-data class BulkAnalysisResponse(
-    val total_files: Int,
-    val processed: Int,
-    val failed: Int,
-    val results: List<AnalysisResult>
+data class RecentDocument(
+    val filename: String,
+    val file_type: String,
+    val file_size_bytes: Int,
+    val page_count: Int?,
+    val content_hash: String?,
+    val summary: String?,
+    val date_analyzed: String
 )
 
-data class AnalysisResult(
-    val file_name: String,
-    val type: String,
-    val analysis: Map<String, Any>?,
-    val status: String,
-    val error: String?
+data class RecentImage(
+    val filename: String,
+    val image_hash: String,
+    val file_size_bytes: Int,
+    val date_analyzed: String
+)
+
+// Rename Suggestion
+data class RenameSuggestion(
+    val original_filename: String,
+    val suggested_filename: String,
+    val reason: String
+)
+
+// Document from /documents endpoint
+data class DocumentRecord(
+    val filename: String,
+    val file_type: String,
+    val file_size_bytes: Int,
+    val page_count: Int?,
+    val content_hash: String?,
+    val summary: String?,
+    val date_analyzed: String,
+    val mobile_summary: String?,
+    val file_size_formatted: String?,
+    val recommendations: List<String>?,
+    val relevance_score: Float?
+)
+
+// Image from /images endpoint
+data class ImageRecord(
+    val filename: String,
+    val image_hash: String,
+    val file_size_bytes: Int,
+    val date_analyzed: String,
+    val mobile_summary: String?,
+    val file_size_formatted: String?,
+    val recommendations: List<String>?,
+    val relevance_score: Float?
 )
 
 interface ClarityApiService {
+
+    @GET("/dashboard")
+    suspend fun getDashboard(): Response<DashboardResponse>
 
     @Multipart
     @POST("/analyze/document")
@@ -115,24 +158,18 @@ interface ClarityApiService {
         @Part file: MultipartBody.Part
     ): Response<ImageAnalysisResponse>
 
-    @GET("/dashboard")
-    suspend fun getDashboard(): Response<DashboardResponse>
-
     @GET("/suggestions")
     suspend fun getCleanupSuggestions(): Response<CleanupSuggestionsResponse>
 
-    @GET("/mobile/insights")
-    suspend fun getMobileInsights(): Response<MobileInsightsResponse>
+    @GET("/rename/suggestions")
+    suspend fun getRenameSuggestions(): Response<List<RenameSuggestion>>
 
     @GET("/documents")
-    suspend fun getAllDocuments(): Response<List<Map<String, Any>>>
+    suspend fun getAllDocuments(): Response<List<DocumentRecord>>
 
     @GET("/images")
-    suspend fun getAllImages(): Response<List<Map<String, Any>>>
+    suspend fun getAllImages(): Response<List<ImageRecord>>
 
-    @Multipart
-    @POST("/analyze/bulk")
-    suspend fun bulkAnalyze(
-        @Part files: List<MultipartBody.Part>
-    ): Response<BulkAnalysisResponse>
+    @GET("/mobile/insights")
+    suspend fun getMobileInsights(): Response<MobileInsightsResponse>
 }

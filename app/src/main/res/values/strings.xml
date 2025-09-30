@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">ClarityAI</string>
+
+    <string name="app_name_styled">🤖 Clarity AI</string>
+    <string name="app_subtitle">Intelligent File Analysis &amp; Storage Optimization</string>
+    <string name="scanning_button">Scanning…</string>
+    <string name="scan_again_button">Scan Again</string>
+    <string name="retry_scan_button">Retry Scan</string>
+    <string name="start_ai_scan_button">🔍 Start AI Scan</string>
+    <string name="reset_button">Reset</string>
+    <string name="analyzing_files_progress">Analyzing files… %1$d%%</string>
+    <string name="scan_error_title">❌ Scan Error</string>
+    <string name="scan_error_message">Unable to complete file scan. Using sample data for
+        demonstration.
+    </string>
+    <string name="analyzed_files_header">📁 Analyzed Files (%1$d)</string>
+    <string name="welcome_title">Ready to Optimize Your Storage</string>
+    <string name="welcome_message_permissions_granted">Tap \'Start AI Scan\' to analyze your files
+        and get intelligent storage recommendations.
+    </string>
+    <string name="welcome_message_permissions_needed">Grant file permissions to analyze your actual
+        files, or continue with sample data for demonstration.
+    </string>
+    <string name="permission_granted_icon">✅</string>
+    <string name="permission_info_icon">ℹ️</string>
+    <string name="permission_status_granted">File access granted - Will scan actual files</string>
+    <string name="permission_status_sample_data">Using sample data - Grant permissions to scan real
+        files
+    </string>
+    <string name="storage_insights_title">📊 Storage Insights</string>
+    <string name="insight_total_files">Total Files</string>
+    <string name="insight_total_size">Total Size</string>
+    <string name="insight_duplicates">Duplicates</string>
+    <string name="ai_recommendations_title">💡 AI Recommendations:</string>
+    <string name="file_modified_date">Modified: %1$s</string>
+    <string name="analyze_button">Analyze</string>
+    <string name="device_files_header">Your Files (%1$d)</string>
+    <string name="sample_files_header">Sample Files (%1$d)</string>
+    <string name="sample_files_subtitle">Demo files for testing features</string>
 </resources>
