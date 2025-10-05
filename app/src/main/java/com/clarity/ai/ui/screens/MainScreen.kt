@@ -394,7 +394,7 @@ fun StorageInsightsCard(insights: StorageInsights) {
                 )
                 InsightItem(
                     label = stringResource(R.string.insight_duplicates),
-                    value = insights.duplicateFiles.toString(), // Assuming duplicateFiles is part of StorageInsights
+                    value =  formatFileSize(insights.duplicateSize), // Assuming duplicateFiles is part of StorageInsights
                     icon = "🔄" // Consider R.string.icon_duplicates
                 )
             }

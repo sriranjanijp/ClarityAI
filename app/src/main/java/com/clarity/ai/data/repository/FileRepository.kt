@@ -57,6 +57,7 @@ class FileRepository(private val context: Context) {
             if (!isBackendConnected) {
                 allFiles.addAll(generateSampleFiles())
             }
+            // If backend *is* connected, do nothing (no samples)
         }
 
         return@withContext allFiles.distinctBy { it.name }
@@ -135,7 +136,7 @@ class FileRepository(private val context: Context) {
                 projection,
                 selection,
                 null,
-                "${projection[3]} DESC LIMIT 50" // Increased limit to show more files
+                "${projection[3]} DESC" // Increased limit to show more files
             )?.use { cursor ->
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(0)
@@ -206,33 +207,35 @@ class FileRepository(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val isConnected = testBackendConnection()
-
+                android.util.Log.d("FileRepository", "Backend connected: $isConnected")
                 if (!isConnected) {
+                    android.util.Log.d("FileRepository", "Backend unavailable, using local analysis")
                     return@withContext createLocalAnalysis(fileInfo, backendAvailable = false)
                 }
-
-                // Sample files don't get uploaded
                 if (fileInfo.path.contains("/sample/")) {
+                    android.util.Log.d("FileRepository", "Sample file path, skipping upload: " + fileInfo.path)
                     return@withContext createLocalAnalysis(fileInfo, backendAvailable = true, isSample = true)
                 }
-
                 val file = File(fileInfo.path)
+                android.util.Log.d("FileRepository", "File exists: ${file.exists()}, canRead: ${file.canRead()}, path: ${file.absolutePath}")
                 if (!file.exists() || !file.canRead()) {
                     return@withContext createLocalAnalysis(fileInfo, backendAvailable = true)
                 }
-
-                // Upload real file to backend
+                android.util.Log.d("FileRepository", "Attempting backend upload for: ${file.name}")
                 uploadAndAnalyzeFile(file, fileInfo)
-
             } catch (e: Exception) {
                 e.printStackTrace()
+                android.util.Log.e("FileRepository", "Upload failed: ${e.message}")
                 createLocalAnalysis(fileInfo, backendAvailable = false)
             }
         }
     }
 
+
     private suspend fun uploadAndAnalyzeFile(file: File, fileInfo: FileInfo): FileAnalysis {
         return try {
+            android.util.Log.d("FileRepository", "Uploading to backend: ${file.name}, type: ${fileInfo.mimeType}")
+
             when {
                 fileInfo.mimeType.startsWith("image/") -> analyzeImageWithBackend(file, fileInfo)
                 fileInfo.mimeType == "application/pdf" -> analyzeDocumentWithBackend(file, fileInfo)
@@ -242,19 +245,25 @@ class FileRepository(private val context: Context) {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            android.util.Log.e("FileRepository", "Analysis failed: ${e.message}")
             createLocalAnalysis(fileInfo, backendAvailable = true, uploadFailed = true)
         }
     }
 
     private suspend fun analyzeImageWithBackend(file: File, fileInfo: FileInfo): FileAnalysis {
         return try {
+            android.util.Log.d("FileRepository", "POST /analyze/image: ${file.name}")
+
             val requestFile = file.asRequestBody(fileInfo.mimeType.toMediaTypeOrNull())
             val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
             val response = apiService.analyzeImage(multipartBody)
 
+            android.util.Log.d("FileRepository", "Response code: ${response.code()}")
+
             if (response.isSuccessful && response.body() != null) {
                 val result = response.body()!!
+                android.util.Log.d("FileRepository", "Success! Hash: ${result.image_hash}")
 
                 FileAnalysis(
                     fileInfo = fileInfo,
@@ -270,23 +279,30 @@ class FileRepository(private val context: Context) {
                     }
                 )
             } else {
+                android.util.Log.e("FileRepository", "Upload failed: ${response.code()} - ${response.message()}")
                 createLocalAnalysis(fileInfo, backendAvailable = true, uploadFailed = true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            android.util.Log.e("FileRepository", "Upload exception: ${e.message}")
             createLocalAnalysis(fileInfo, backendAvailable = true, uploadFailed = true)
         }
     }
 
     private suspend fun analyzeDocumentWithBackend(file: File, fileInfo: FileInfo): FileAnalysis {
         return try {
+            android.util.Log.d("FileRepository", "POST /analyze/document: ${file.name}")
+
             val requestFile = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
             val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
             val response = apiService.analyzeDocument(multipartBody)
 
+            android.util.Log.d("FileRepository", "Response code: ${response.code()}")
+
             if (response.isSuccessful && response.body() != null) {
                 val result = response.body()!!
+                android.util.Log.d("FileRepository", "Success! Summary: ${result.summary?.take(50)}...")
 
                 FileAnalysis(
                     fileInfo = fileInfo,
@@ -304,10 +320,12 @@ class FileRepository(private val context: Context) {
                     }
                 )
             } else {
+                android.util.Log.e("FileRepository", "Upload failed: ${response.code()} - ${response.message()}")
                 createLocalAnalysis(fileInfo, backendAvailable = true, uploadFailed = true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            android.util.Log.e("FileRepository", "Upload exception: ${e.message}")
             createLocalAnalysis(fileInfo, backendAvailable = true, uploadFailed = true)
         }
     }

@@ -89,21 +89,22 @@ class FileAnalysisViewModel(application: Application) : AndroidViewModel(applica
             _scanProgress.value = 0f
 
             try {
-                // Simulate scanning progress
-                for (i in 1..10) {
-                    delay(200)
-                    _scanProgress.value = i / 10f
-                }
+                // ...scanning code...
 
                 val files = fileRepository.scanAllAccessibleFiles()
                 _analyzedFiles.value = files
+
+                // Automatically trigger backend analysis for each real (device) file:
+                val realFiles = files.filter { !it.path.contains("/sample/") }
+                for (file in realFiles) {
+                    fileRepository.performAIAnalysis(file)
+                    // Optionally update state when each is done for progress
+                }
 
                 val insights = fileRepository.generateStorageInsights(files)
                 _storageInsights.value = insights
 
                 _scanState.value = ScanState.COMPLETED
-
-                // Also refresh backend data after scan
                 loadBackendAnalyzedFiles()
 
             } catch (e: Exception) {
@@ -112,6 +113,7 @@ class FileAnalysisViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
 
     fun loadBackendAnalyzedFiles() {
         viewModelScope.launch {
