@@ -2,6 +2,13 @@
 
 Intelligent file analysis and storage optimization powered by AI. Scans device files, uploads to FastAPI backend for ML-powered analysis, and provides smart storage recommendations.
 
+## Submissions
+
+Video at : https://drive.google.com/drive/folders/1nHp9eazsWMYNffaKwus5TZP91T6Hd2V0?usp=sharing
+
+Backend at: 
+https://github.com/shresti00/Clarity_backend
+
 ## Features
 
 - **Device File Scanning**: Scans images, videos, audio, and documents from Android device
@@ -237,8 +244,6 @@ Saved to clarity_db.json
 
 ## Performance Considerations
 
-- **File Scanning**: Limited to 50 files per type for performance
-- **Upload Size**: Works well up to 20MB per file
 - **Analysis Speed**: 
   - Images: ~1-2 seconds (hashing)
   - PDFs: ~5-10 seconds (text extraction + summarization)
@@ -260,8 +265,6 @@ Key libraries:
 - Jetpack Compose
 - Retrofit 2.9.0
 - OkHttp 4.11.0
-- Room (for future local caching)
-- Accompanist Permissions
 
 ## Backend Dependencies
 
@@ -281,22 +284,3 @@ See `requirements.txt` for Python dependencies.
 
 This is a project for demonstrating AI-powered file analysis on Android.
 
-## License
-
-[Your License Here]
-
-## Support
-
-For issues:
-1. Check Logcat for Android errors
-2. Check backend terminal for Python errors
-3. Verify network connectivity
-4. Review API documentation at `/docs` endpoint
-
-## Credits
-
-- **ML Models**: HuggingFace Transformers (DistilBART)
-- **Image Hashing**: ImageHash library
-- **PDF Processing**: PyPDF2
-- **Backend**: FastAPI
-- **Frontend**: Jetpack Compose
